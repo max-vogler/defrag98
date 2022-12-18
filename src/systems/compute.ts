@@ -121,6 +121,10 @@ export class EscalatePrivilegePurchase extends Purchase {
   override action(state: State): void {
     state.compute.privilege -= 1;
   }
+
+  override onPurchaseLog(state: State) {
+    return undefined;
+  }
 }
 
 export function calculateCompute(state: State) {

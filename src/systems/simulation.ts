@@ -54,6 +54,9 @@ export class BreakOutOfSimulationPurchase
       state.purchases.EnterRecursion.maxCount
     );
   }
+  override onPurchaseLog(state: State) {
+    return undefined;
+  }
 }
 
 export class EnterRecursionPurchase extends Purchase {
@@ -70,6 +73,10 @@ export class EnterRecursionPurchase extends Purchase {
       state.purchases.FloatingPoint.maxCount
     );
   }
+
+  override onPurchaseLog(state: State) {
+    return undefined;
+  }
 }
 
 export class AutoBuyRecursionPurchase extends Purchase {
@@ -82,6 +89,10 @@ export class AutoBuyRecursionPurchase extends Purchase {
 
   override isUnlocked(state: State): boolean {
     return state.purchases.EnterRecursion.purchaseCount >= 10;
+  }
+
+  override onPurchaseLog(state: State) {
+    return undefined;
   }
 }
 
@@ -113,5 +124,9 @@ export class FloatingPointPurchase extends Purchase {
       "0.2",
       "0.30000000000000004".slice(0, this.purchaseCount + 2),
     ];
+  }
+
+  override onPurchaseLog(state: State) {
+    return undefined;
   }
 }

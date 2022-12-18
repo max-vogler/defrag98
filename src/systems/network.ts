@@ -55,6 +55,10 @@ export class ScanNetworkPurchase extends Purchase {
       };
     }
   }
+
+  override onPurchaseLog(state: State) {
+    return undefined;
+  }
 }
 
 export default class AutoScanNetworkPurchase
@@ -71,6 +75,10 @@ export default class AutoScanNetworkPurchase
 
   unlocksSystem(state: State): void {
     state.purchases.ScanNetwork.startPurchase(state);
+  }
+
+  override onPurchaseLog(state: State) {
+    return undefined;
   }
 }
 
@@ -107,6 +115,10 @@ export class TryPasswordPurchase extends Purchase {
       state.network.passwordAttempt = { correct, incorrect };
     }
   }
+
+  override onPurchaseLog(state: State) {
+    return undefined;
+  }
 }
 
 export class BruteforcePasswordPurchase
@@ -135,6 +147,10 @@ export class BruteforcePasswordPurchase
         incorrect: "",
       };
     }
+  }
+
+  override onPurchaseLog(state: State) {
+    return undefined;
   }
 }
 

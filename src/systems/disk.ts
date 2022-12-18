@@ -117,6 +117,10 @@ export class AutoWriteDiskPurchase extends Purchase {
   override isUnlocked(state: State): boolean {
     return state.purchases.AutoReadDisk.isFullyPurchased;
   }
+
+  override onPurchaseLog(state: State) {
+    return undefined;
+  }
 }
 
 export class AutoReadDiskPurchase extends Purchase {
@@ -125,6 +129,10 @@ export class AutoReadDiskPurchase extends Purchase {
 
   override isUnlocked(state: State): boolean {
     return state.memory.cells.length > 15;
+  }
+
+  override onPurchaseLog(state: State) {
+    return undefined;
   }
 }
 

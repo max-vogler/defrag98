@@ -1,5 +1,7 @@
 import { State } from ".";
 import { values } from "lodash";
+import { calculateCompute } from "./compute";
+import { unit } from "../text";
 
 export abstract class Purchase {
   abstract initialPrice: number;
@@ -49,6 +51,16 @@ export abstract class Purchase {
     this.purchaseCount += 1;
     this.remainingPrice = undefined;
     this.action(state);
+    calculateCompute(state);
+
+    const log = this.onPurchaseLog(state);
+    if (log) {
+      state.logs.push(log);
+    }
+  }
+
+  onPurchaseLog(state: State): string | undefined {
+    return `${this.label} finished. Now: ${unit(state.compute.flops, "OPS")}.`;
   }
 }
 
