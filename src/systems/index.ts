@@ -31,10 +31,7 @@ import AutoScanNetworkPurchase, {
 import { KillProcessPurchase, SpawnThreadPurchase } from "./compute";
 import { AllocateMemoryPurchase } from "../systems/memory";
 import { HackComputerPurchase, ScanNetworkPurchase } from "./network";
-import {
-  createInitialResearch,
-  Research,
-} from "./research";
+import { createInitialResearch, Research } from "./research";
 import {
   AutoBuyRecursionPurchase,
   autoBuyRecursionSystem,
@@ -54,6 +51,8 @@ export interface State {
   logs: string[];
   screenshot?: string;
 }
+
+export const TICK_INTERVAL = 100;
 
 function makeInitialLogs(level: number): string[] {
   const y = 1998 + (new Date().getFullYear() - 1998) * ((level - 1) / 10);

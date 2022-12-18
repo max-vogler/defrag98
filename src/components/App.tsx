@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Grid } from "./Grid";
 import Window from "./Window";
 import { useAction, useDynamicInterval, useInterval } from "../hooks";
-import { applySystems, createNewState, State } from "../systems";
+import { applySystems, createNewState, State, TICK_INTERVAL } from "../systems";
 import PurchaseButton from "./PurchaseButton";
 import { unit } from "../text";
 import { getCellColors, readWriteDiskCell } from "../systems/disk";
@@ -22,14 +22,15 @@ import FloatingPointAnalysisWindow from "./FloatingPointAnalysisWindow";
 
 function App() {
   const [state, setState] = useState<State>(createNewState());
+  window.gameState = state;
 
   useInterval(
     () => {
       applySystems(state);
       setState({ ...state });
-      (window as any).gameState = state;
+      window.gameState = state;
     },
-    100,
+    TICK_INTERVAL,
     [state]
   );
 
@@ -114,7 +115,8 @@ function App() {
         >
           <div className="column">
             <div style={{ fontSize: "2rem" }}>
-              Compute: {unit(state.compute.flops, "OP/s")}
+              Compute:{" "}
+              {unit(state.compute.opsPerTick * (1000 / TICK_INTERVAL), "OP/s")}
             </div>
             <div className="row">
               <PurchaseButton

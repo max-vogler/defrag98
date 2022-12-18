@@ -10,7 +10,7 @@ interface Process {
 export interface Compute {
   threads: number;
   hyperthreading: number;
-  flops: number;
+  opsPerTick: number;
   processes: Process[];
   privilege: number;
   selectedProcess?: Process;
@@ -33,7 +33,7 @@ const INITIAL_PROCESSES: readonly Process[] = [
 
 export function createInitialCompute(): Compute {
   return {
-    flops: 0,
+    opsPerTick: 0,
     threads: 1,
     hyperthreading: 1,
     processes: [...INITIAL_PROCESSES],
@@ -128,12 +128,12 @@ export class EscalatePrivilegePurchase extends Purchase {
 }
 
 export function calculateCompute(state: State) {
-  state.compute.flops =
+  state.compute.opsPerTick =
     state.compute.threads *
     (INITIAL_PROCESSES.length - state.compute.processes.length + 1) *
     state.disk.iops *
     getTotalMemory(state) *
     state.network.owned *
     state.level;
-  state.compute.flops += (window as any).flopBonus ?? 0;
+  state.compute.opsPerTick += Number(window.opsBonus) || 0;
 }

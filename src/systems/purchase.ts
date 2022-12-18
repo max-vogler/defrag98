@@ -28,8 +28,7 @@ export abstract class Purchase {
 
   showButton(state: State) {
     return (
-      ((window as any).unlockAll || this.isUnlocked(state)) &&
-      !this.isFullyPurchased
+      (window.unlockAll || this.isUnlocked(state)) && !this.isFullyPurchased
     );
   }
 
@@ -60,7 +59,10 @@ export abstract class Purchase {
   }
 
   onPurchaseLog(state: State): string | undefined {
-    return `${this.label} finished. Now: ${unit(state.compute.flops, "OP/s")}.`;
+    return `${this.label} finished. Now: ${unit(
+      state.compute.opsPerTick,
+      "OP/s"
+    )}.`;
   }
 }
 
@@ -78,33 +80,33 @@ export function runSystemIfPurchased(
 }
 
 export function progressPurchases(state: State) {
-  let flopsToSpend = state.compute.flops;
+  let opsToSpend = state.compute.opsPerTick;
   const currentPurchases = new Set(
     values(state.purchases).filter((p) => p.remainingPrice)
   );
 
-  while (flopsToSpend > 0 && currentPurchases.size > 0) {
-    const flopsPerPurchase = Math.max(
-      Math.trunc(flopsToSpend / currentPurchases.size),
+  while (opsToSpend > 0 && currentPurchases.size > 0) {
+    const opsPerPurchase = Math.max(
+      Math.trunc(opsToSpend / currentPurchases.size),
       1
     );
 
     for (const purchase of currentPurchases) {
       if (!purchase.remainingPrice) {
         currentPurchases.delete(purchase);
-      } else if (purchase.remainingPrice > flopsPerPurchase) {
-        purchase.remainingPrice -= flopsPerPurchase;
-        flopsToSpend -= flopsPerPurchase;
+      } else if (purchase.remainingPrice > opsPerPurchase) {
+        purchase.remainingPrice -= opsPerPurchase;
+        opsToSpend -= opsPerPurchase;
       } else {
         currentPurchases.delete(purchase);
-        flopsToSpend -= purchase.remainingPrice;
+        opsToSpend -= purchase.remainingPrice;
         purchase.remainingPrice = 0;
         purchase.onPurchase(state);
       }
 
-      // If 0 < flopsPerPurchase < 1, flopsPerPurchase is set to 1. We subtract 1
-      // off of each active purchase until flopsToSpend is 0, at which point we stop.
-      if (flopsToSpend < 0) {
+      // If 0 < opsPerPurchase < 1, opsPerPurchase is set to 1. We subtract 1
+      // off of each active purchase until opsToSpend is 0, at which point we stop.
+      if (opsToSpend < 0) {
         return;
       }
     }
