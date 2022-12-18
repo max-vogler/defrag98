@@ -1,5 +1,6 @@
 *.zip
 NOTES.md
+media/
 
 # Logs
 logs
