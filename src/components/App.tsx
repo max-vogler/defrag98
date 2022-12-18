@@ -41,7 +41,11 @@ function App() {
       <LogWindow windowTitle="Command Prompt" state={state} />
       <Window
         windowTitle="Defragmenting Drive C"
-        statusBar={[unit(state.disk.iops, "IOPS")]}
+        statusBar={[
+          `Defragmented: ${
+            state.disk.defragmentedBlockEnd - state.disk.defragmentedBlockStart
+          }`,
+        ]}
       >
         <div className="column">
           <Grid
@@ -101,7 +105,7 @@ function App() {
         >
           <div className="column">
             <div style={{ fontSize: "2rem" }}>
-              Compute: {unit(state.compute.flops, "FLOPS")}
+              Compute: {unit(state.compute.flops, "OPS")}
             </div>
             <div className="row">
               <PurchaseButton
