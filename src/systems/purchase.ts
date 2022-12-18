@@ -60,7 +60,7 @@ export abstract class Purchase {
   }
 
   onPurchaseLog(state: State): string | undefined {
-    return `${this.label} finished. Now: ${unit(state.compute.flops, "OPS")}.`;
+    return `${this.label} finished. Now: ${unit(state.compute.flops, "OP/s")}.`;
   }
 }
 

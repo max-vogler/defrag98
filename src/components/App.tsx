@@ -105,7 +105,7 @@ function App() {
         >
           <div className="column">
             <div style={{ fontSize: "2rem" }}>
-              Compute: {unit(state.compute.flops, "OPS")}
+              Compute: {unit(state.compute.flops, "OP/s")}
             </div>
             <div className="row">
               <PurchaseButton

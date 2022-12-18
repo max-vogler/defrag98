@@ -1,12 +1,12 @@
 const UNIT_LOOKUP = [
   { value: 1e3, symbol: "k" },
-  { value: 1e6, symbol: "M" },
-  { value: 1e9, symbol: "G" },
-  { value: 1e12, symbol: "T" },
-  { value: 1e15, symbol: "P" },
-  { value: 1e18, symbol: "E" },
-  { value: 1e21, symbol: "Z" },
-  { value: 1e24, symbol: "Y" },
+  { value: 1e6, symbol: "m" },
+  { value: 1e9, symbol: "g" },
+  { value: 1e12, symbol: "t" },
+  { value: 1e15, symbol: "p" },
+  { value: 1e18, symbol: "e" },
+  { value: 1e21, symbol: "z" },
+  { value: 1e24, symbol: "y" },
 ]
   .slice()
   .reverse();
