@@ -133,6 +133,21 @@ button {
   user-select: none;
 }
 
+.progress-button {
+  --progress: 0%;
+  background: linear-gradient(
+    to right,
+    navy 0%,
+    #1084d0 calc(var(--progress)),
+    silver calc(var(--progress))
+  );
+
+  &[disabled] {
+    box-shadow: inset -1px -1px #fff, inset 1px 1px grey,
+      inset -2px -2px #dfdfdf, inset 2px 2px #0a0a0a;
+  }
+}
+
 .window select {
   width: 100%;
   user-select: none;

@@ -18,21 +18,24 @@ export default function PurchaseButton(
     [props.state, props.setState]
   );
 
-  const progress = props.purchase.remainingPrice
-    ? `${Math.trunc(
-        100 - (props.purchase.remainingPrice / props.purchase.price) * 100
-      )} %`
-    : unit(props.purchase.price, "OP");
+  const progressPercent = props.purchase.remainingPrice
+    ? 100 - (props.purchase.remainingPrice / props.purchase.price) * 100
+    : 0;
 
   return props.purchase.showButton(props.state) ? (
     <button
+      className="progress-button"
       onClick={() => (props.purchase.inProgress ? null : triggerPurchase())}
+      style={{
+        "--progress": `${progressPercent}%`,
+      }}
+      disabled={props.purchase.inProgress}
     >
       {props.children ? (
         props.children
       ) : (
         <>
-          {props.purchase.label} ({progress})
+          {props.purchase.label} ({unit(props.purchase.price, "OP")})
         </>
       )}
     </button>
