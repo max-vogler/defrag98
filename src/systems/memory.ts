@@ -1,6 +1,8 @@
 import { State } from ".";
 import { Purchase } from "./purchase";
 
+export const TASK_WINDOW_MIN_MEMORY = 16;
+
 export interface Memory {
   cells: boolean[];
   pageSize: number;

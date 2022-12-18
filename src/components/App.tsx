@@ -10,7 +10,7 @@ import BreakOutWindows from "./BreakOutWindows";
 import CommandPromptWindow from "./CommandPromptWindow";
 import Worldmap from "./Worldmap";
 import LogWindow from "./LogWindow";
-import { getTotalMemory } from "../systems/memory";
+import { getTotalMemory, TASK_WINDOW_MIN_MEMORY } from "../systems/memory";
 import {
   DEFRAG,
   FIREWALL,
@@ -73,7 +73,16 @@ function App() {
       </Window>
       <Window
         windowTitle="Memory"
-        statusBar={[`Allocated ${unit(getTotalMemory(state), "B")}`]}
+        statusBar={[
+          `Allocated ${unit(getTotalMemory(state), "B")}`,
+          ...(state.memory.cells.length < TASK_WINDOW_MIN_MEMORY
+            ? [
+                `Allocate ${
+                  TASK_WINDOW_MIN_MEMORY - state.memory.cells.length
+                } more memory cells to unlock more capabilities.`,
+              ]
+            : []),
+        ]}
       >
         <div className="column">
           <Grid
@@ -98,7 +107,7 @@ function App() {
           </div>
         </div>
       </Window>
-      {state.memory.cells.length > 15 ? (
+      {state.memory.cells.length >= TASK_WINDOW_MIN_MEMORY ? (
         <Window
           windowTitle={`Task Info: ${DEFRAG}`}
           statusBar={[`Privilege ring: ${state.compute.privilege}`]}
