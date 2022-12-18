@@ -4,6 +4,8 @@ import { Purchase } from "./purchase";
 
 export interface Disk {
   cells: boolean[];
+  defragmentedBlockStart: number;
+  defragmentedBlockEnd: number;
   size: number;
   iops: number;
   ssd: boolean;
@@ -16,25 +18,58 @@ export function createInitialDisk(): Disk {
     ...fill(Array(initialFilledCells), true),
     ...fill(Array(initialTotalCells - initialFilledCells), false),
   ]);
-  return { cells, iops: 0, size: initialTotalCells, ssd: false };
+  return {
+    cells,
+    iops: 0,
+    size: initialTotalCells,
+    ssd: false,
+    defragmentedBlockStart: 0,
+    defragmentedBlockEnd: 0,
+  };
 }
 
-export function getIOPS(disk: Disk) {
-  if (disk.ssd) {
-    return disk.size * 10;
-  }
-
-  const start = disk.cells.indexOf(true);
-  if (start === -1) {
-    return 0;
-  }
-
-  const end = disk.cells.indexOf(false, start);
-  return end - start;
+export function getCellColors(disk: Disk) {
+  return disk.cells.map((c, i) => {
+    if (!c) {
+      return "transparent";
+    } else if (
+      i >= disk.defragmentedBlockStart &&
+      i < disk.defragmentedBlockEnd
+    ) {
+      return "#027ffd";
+    } else {
+      return "cyan";
+    }
+  });
 }
 
 export function calculateIOPS(disk: Disk) {
-  disk.iops = getIOPS(disk);
+  let currentBlockStart: number | undefined;
+  let largestBlockStart = 0;
+  let largestBlockSize = 0;
+
+  for (let i = 0; i < disk.cells.length; i++) {
+    const cur = disk.cells[i];
+
+    if (!cur) {
+      if (currentBlockStart !== undefined) {
+        const currentBlockSize = i - currentBlockStart;
+
+        if (largestBlockSize < currentBlockSize) {
+          largestBlockSize = currentBlockSize;
+          largestBlockStart = currentBlockStart;
+        }
+
+        currentBlockStart = undefined;
+      }
+    } else if (currentBlockStart === undefined) {
+      currentBlockStart = i;
+    }
+  }
+
+  disk.iops = largestBlockSize;
+  disk.defragmentedBlockStart = largestBlockStart;
+  disk.defragmentedBlockEnd = largestBlockStart + largestBlockSize;
 }
 
 export function fragment(disk: Disk) {

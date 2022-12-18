@@ -5,7 +5,7 @@ import { useAction, useDynamicInterval, useInterval } from "../hooks";
 import { applySystems, createNewState, State } from "../systems";
 import PurchaseButton from "./PurchaseButton";
 import { unit } from "../text";
-import { readWriteDiskCell } from "../systems/disk";
+import { getCellColors, readWriteDiskCell } from "../systems/disk";
 import BreakOutWindows from "./BreakOutWindows";
 import CommandPromptWindow from "./CommandPromptWindow";
 import Worldmap from "./Worldmap";
@@ -45,7 +45,7 @@ function App() {
       >
         <div className="column">
           <Grid
-            cells={state.disk.cells.map((c) => (c ? "cyan" : "transparent"))}
+            cells={getCellColors(state.disk)}
             onCellClick={triggerReadWriteCell}
           />
           <div className="row">
