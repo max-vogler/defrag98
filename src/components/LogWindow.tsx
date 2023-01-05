@@ -19,7 +19,8 @@ export default function LogWindow({ state, ...props }: Props) {
       logLines[i] = state.logs[i].slice(0, logLines[i].length + 5);
       setLogLines(logLines);
 
-      codeEl.current!.parentElement!.scrollTo({
+      // TODO: Mock Element.scrollTo() in JSDOM to remove the unnecessary ?.
+      codeEl.current!.parentElement!.scrollTo?.({
         top: logLines.length * 999,
         behavior: "smooth",
       });
