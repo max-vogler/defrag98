@@ -22,7 +22,7 @@ export function useInterval(
 }
 
 export function useDynamicInterval(cb: () => number, deps?: DependencyList) {
-  let [id, setId] = useState(0);
+  let [id, setId] = useState<ReturnType<typeof setTimeout> | undefined>();
 
   const executeAndReschedule = () => {
     clearTimeout(id);
@@ -31,12 +31,12 @@ export function useDynamicInterval(cb: () => number, deps?: DependencyList) {
   };
 
   return useEffect(() => {
-    if (!id) {
+    if (id === undefined) {
       executeAndReschedule();
     }
     return () => {
       clearTimeout(id);
-      setId(0);
+      setId(undefined);
     };
   }, deps);
 }

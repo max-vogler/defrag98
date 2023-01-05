@@ -1,4 +1,9 @@
-import { Dispatch, PropsWithChildren, SetStateAction } from "react";
+import {
+  CSSProperties,
+  Dispatch,
+  PropsWithChildren,
+  SetStateAction,
+} from "react";
 import { useAction } from "../hooks";
 import { State } from "../systems";
 import { Purchase } from "../systems/purchase";
@@ -8,6 +13,10 @@ export interface PurchaseButtonProps {
   state: State;
   setState: Dispatch<SetStateAction<State>>;
   purchase: Purchase;
+}
+
+interface PurchaseButtonStyle extends CSSProperties {
+  "--progress": `${number}%`;
 }
 
 export default function PurchaseButton(
@@ -22,13 +31,13 @@ export default function PurchaseButton(
     ? 100 - (props.purchase.remainingPrice / props.purchase.price) * 100
     : 0;
 
+  const style: PurchaseButtonStyle = { "--progress": `${progressPercent}%` };
+
   return props.purchase.showButton(props.state) ? (
     <button
       className="progress-button"
       onClick={() => (props.purchase.inProgress ? null : triggerPurchase())}
-      style={{
-        "--progress": `${progressPercent}%`,
-      }}
+      style={style}
       disabled={props.purchase.inProgress}
     >
       {props.children ? (
