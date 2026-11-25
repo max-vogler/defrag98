@@ -200,7 +200,7 @@ body,
   box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.35), inset -1px -1px #0a0a0a, inset 1px 1px #dfdfdf, inset -2px -2px grey, inset 2px 2px #fff;
 
   &.wide-window {
-    width: 444px;
+    width: 400px;
   }
 
   &.compact-window {
@@ -299,7 +299,7 @@ body,
     font-size: 12px;
     line-height: 1.35;
     padding: 7px 8px;
-    height: 138px;
+    height: 124px;
     overflow-y: auto;
     box-shadow: inset 1px 1px #000, inset -1px -1px #808080;
     white-space: pre-wrap;

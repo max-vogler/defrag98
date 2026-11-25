@@ -41,7 +41,7 @@ export default function LogWindow({
   return (
     <Window
       windowTitle="MS-DOS Command Prompt"
-      className="commandprompt wide-window"
+      className="commandprompt"
       onMinimize={onMinimize}
       onTitleMouseDown={onTitleMouseDown}
       onFocusWindow={onFocusWindow}

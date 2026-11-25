@@ -56,16 +56,16 @@ const THEME_LABELS: Record<ThemeId, string> = {
 
 const DEFAULT_POS: Record<WindowId, { x: number; y: number }> = {
   cmd: { x: 6, y: 6 },
-  defrag: { x: 6, y: 230 },
-  taskman: { x: 6, y: 526 },
-  memory: { x: 396, y: 6 },
-  taskinfo: { x: 396, y: 230 },
-  fp: { x: 396, y: 548 },
-  networks: { x: 810, y: 6 },
-  login: { x: 810, y: 302 },
-  nested: { x: 810, y: 486 },
-  minesweeper: { x: 810, y: 6 },
-  breakout: { x: 320, y: 150 },
+  defrag: { x: 6, y: 244 },
+  taskman: { x: 6, y: 534 },
+  memory: { x: 392, y: 6 },
+  taskinfo: { x: 392, y: 196 },
+  fp: { x: 392, y: 552 },
+  networks: { x: 804, y: 6 },
+  login: { x: 804, y: 312 },
+  nested: { x: 804, y: 6 },
+  minesweeper: { x: 804, y: 6 },
+  breakout: { x: 290, y: 150 },
 };
 
 export default function App() {
@@ -540,6 +540,7 @@ export default function App() {
           {!isMinimized("memory") ? (
             <Window
               windowTitle="Memory (RAM)"
+              className="wide-window"
               onMinimize={() => minimizeWindow("memory")}
               onTitleMouseDown={(e) => startDragWindow("memory", e)}
               onFocusWindow={() => focusWindow("memory")}
@@ -742,7 +743,6 @@ export default function App() {
           {state.compute.privilege < INITIAL_PRIVILEGE && !isMinimized("taskman") ? (
             <Window
               windowTitle="Windows Task Manager (TASKMAN.EXE)"
-              className="wide-window"
               onMinimize={() => minimizeWindow("taskman")}
               onTitleMouseDown={(e) => startDragWindow("taskman", e)}
               onFocusWindow={() => focusWindow("taskman")}
