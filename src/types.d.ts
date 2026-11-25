@@ -1,8 +1,8 @@
-import { State } from "./systems";
+import { GameState } from "./systems";
 
 declare global {
-  declare interface Window {
-    gameState?: State;
+  interface Window {
+    gameState?: GameState;
     opsBonus?: number;
     unlockAll?: boolean;
   }

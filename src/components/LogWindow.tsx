@@ -1,45 +1,72 @@
-import { Fragment, useEffect, useRef, useState } from "react";
-import { State } from "../systems";
-import CommandPromptWindow from "./CommandPromptWindow";
-import { WindowProps } from "./Window";
+import { CSSProperties, FormEvent, useEffect, useRef, useState } from "react";
+import { GameState, runDosCommand } from "../systems";
+import Window from "./Window";
 
-interface Props extends WindowProps {
-  state: State;
+interface Props {
+  state: GameState;
+  onMutate: () => void;
+  onMinimize: () => void;
+  style?: CSSProperties;
+  inactive?: boolean;
+  onTitleMouseDown?: (e: React.MouseEvent) => void;
+  onFocusWindow?: () => void;
 }
 
-export default function LogWindow({ state, ...props }: Props) {
-  props.className = (props.className ?? "") + " scrollable";
-  const [logLines, setLogLines] = useState<string[]>([""]);
-  const codeEl = useRef<HTMLElement>(null);
+export default function LogWindow({
+  state,
+  onMutate,
+  onMinimize,
+  style,
+  inactive,
+  onTitleMouseDown,
+  onFocusWindow,
+}: Props) {
+  const [input, setInput] = useState("");
+  const screenRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const i = logLines.length - 1;
-
-    if (state.logs[i].length > logLines[i].length) {
-      logLines[i] = state.logs[i].slice(0, logLines[i].length + 5);
-      setLogLines(logLines);
-
-      // TODO: Mock Element.scrollTo() in JSDOM to remove the unnecessary ?.
-      codeEl.current!.parentElement!.scrollTo?.({
-        top: logLines.length * 999,
-        behavior: "smooth",
-      });
-    } else if (i < state.logs.length - 1) {
-      logLines.push("");
-      setLogLines(logLines);
+    if (screenRef.current) {
+      screenRef.current.scrollTop = screenRef.current.scrollHeight;
     }
-  }, [state, logLines, codeEl]);
+  }, [state.logs.length]);
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+    runDosCommand(state, input);
+    setInput("");
+    onMutate();
+  };
 
   return (
-    <CommandPromptWindow {...props}>
-      <code ref={codeEl}>
-        {logLines.map((line, i) => (
-          <Fragment key={i}>
-            {line}
-            <br />
-          </Fragment>
+    <Window
+      windowTitle="MS-DOS Command Prompt"
+      className="commandprompt wide-window"
+      onMinimize={onMinimize}
+      onTitleMouseDown={onTitleMouseDown}
+      onFocusWindow={onFocusWindow}
+      inactive={inactive}
+      style={style}
+      statusBar={[
+        `Layer: -${state.level}`,
+        "Interactive DOS shell (try 'help')",
+      ]}
+    >
+      <div className="cmd-screen" ref={screenRef}>
+        {state.logs.slice(-60).map((line, i) => (
+          <div key={i}>{line || "\u00A0"}</div>
         ))}
-      </code>
-    </CommandPromptWindow>
+      </div>
+      <form className="cmd-input-row" onSubmit={handleSubmit}>
+        <span>C:\&gt;</span>
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="type 'help', 'dir', 'stats', '0.1+0.2'..."
+          aria-label="DOS Command Input"
+        />
+      </form>
+    </Window>
   );
 }

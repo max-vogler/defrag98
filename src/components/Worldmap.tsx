@@ -1,67 +1,84 @@
-import { shuffle } from "lodash";
 import { useEffect, useMemo, useRef } from "react";
-import WorldmapImage from "../assets/worldmap.png";
-import WorldmapJson from "../assets/worldmapland.json";
-import { usePrevious } from "../hooks";
+import { getSeededDiscoveryOrder, WORLDMAP_LAND } from "../systems";
 
 interface Props {
   discovered: number;
   owned: number;
+  seed: number;
 }
 
-export default function Worldmap(props: Props) {
+export default function Worldmap({ discovered, owned, seed }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const previousDiscovered = usePrevious(props.discovered) ?? 0;
-  const previousOwned = usePrevious(props.owned) ?? 0;
-  const discoveryOrder = useMemo(() => shuffle(WorldmapJson), []);
-  const width = 31;
+  const order = useMemo(() => getSeededDiscoveryOrder(seed), [seed]);
 
   useEffect(() => {
-    if (!canvasRef.current) {
-      return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const cols = 31;
+    const rows = 16;
+    const cellW = 10;
+    const cellH = 9;
+
+    // CRT ocean background with subtle grid
+    ctx.fillStyle = "#04120a";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.strokeStyle = "rgba(0, 255, 110, 0.08)";
+    ctx.lineWidth = 1;
+    for (let x = 0; x <= cols; x += 3) {
+      ctx.beginPath();
+      ctx.moveTo(x * cellW, 0);
+      ctx.lineTo(x * cellW, rows * cellH);
+      ctx.stroke();
     }
-    const ctx = canvasRef.current.getContext("2d")!;
-    ctx.imageSmoothingEnabled = false;
-
-    const data = ctx.createImageData(1, 1);
-    data.data[0] = 255;
-    data.data[3] = 255;
-
-    for (
-      let i = previousDiscovered;
-      i < props.discovered && i < discoveryOrder.length;
-      i++
-    ) {
-      const n = discoveryOrder[i];
-      ctx.putImageData(data, Math.trunc(n % width), Math.trunc(n / width));
+    for (let y = 0; y <= rows; y += 3) {
+      ctx.beginPath();
+      ctx.moveTo(0, y * cellH);
+      ctx.lineTo(cols * cellW, y * cellH);
+      ctx.stroke();
     }
 
-    data.data[0] = 0;
-    data.data[1] = 255;
-
-    for (
-      let i = previousOwned;
-      i < props.owned && i < discoveryOrder.length;
-      i++
-    ) {
-      const n = discoveryOrder[i];
-      ctx.putImageData(data, Math.trunc(n % width), Math.trunc(n / width));
+    // Draw base land mass silhouettes
+    ctx.fillStyle = "#123c24";
+    for (const idx of WORLDMAP_LAND) {
+      const x = idx % cols;
+      const y = Math.floor(idx / cols);
+      ctx.fillRect(x * cellW + 1, y * cellH + 1, cellW - 2, cellH - 2);
     }
-  }, [canvasRef, props.discovered, props.owned]);
+
+    // Discovered hosts (amber/red)
+    ctx.fillStyle = "#ff4d4d";
+    for (let i = 0; i < Math.min(discovered, order.length); i++) {
+      const idx = order[i];
+      const x = idx % cols;
+      const y = Math.floor(idx / cols);
+      ctx.fillRect(x * cellW + 1, y * cellH + 1, cellW - 2, cellH - 2);
+    }
+
+    // Owned botnet nodes (bright phosphor green)
+    ctx.fillStyle = "#00ff66";
+    for (let i = 0; i < Math.min(owned, order.length); i++) {
+      const idx = order[i];
+      const x = idx % cols;
+      const y = Math.floor(idx / cols);
+      ctx.fillRect(x * cellW + 1, y * cellH + 1, cellW - 2, cellH - 2);
+    }
+  }, [discovered, owned, order]);
 
   return (
-    <div className="zstack">
-      <img src={WorldmapImage} width={31 * 8} />
-      <canvas
-        ref={canvasRef}
-        width={31}
-        height={16}
-        style={{
-          transform: "scale(8)",
-          transformOrigin: "0 0",
-          imageRendering: "pixelated",
-        }}
-      />
-    </div>
+    <canvas
+      ref={canvasRef}
+      width={310}
+      height={144}
+      style={{
+        width: "100%",
+        height: "auto",
+        display: "block",
+        imageRendering: "pixelated",
+      }}
+    />
   );
 }

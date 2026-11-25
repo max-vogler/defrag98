@@ -1,11 +1,10 @@
-import { shuffle } from "lodash";
-import { State } from ".";
-import { Purchase, UnlocksSystem } from "./purchase";
 import WorldmapJson from "../assets/worldmapland.json";
+import { GameState, NetworkState } from "./types";
 
-export const NETWORK_COUNT = WorldmapJson.length;
+export const WORLDMAP_LAND: number[] = WorldmapJson;
+export const NETWORK_COUNT = WORLDMAP_LAND.length;
 
-const PASSWORDS = [
+export const PASSWORDS = [
   "123",
   "bios",
   "admin",
@@ -24,155 +23,73 @@ const PASSWORDS = [
   "correcthorsebatter",
 ];
 
-const PASSWORD_CHARACTERS = "abcdefghijklmnopqrstuvwxyz0123456789";
+const HOSTNAMES = [
+  "MOM-PENTIUM98",
+  "SCHOOL-LAB-04",
+  "LOCAL-ISP-POP3",
+  "GEOCITIES-MIRROR",
+  "AOL-RELAY-14",
+  "MIT-AI-VAX",
+  "CERN-LXPLUS-09",
+  "ZURICH-SWIFT-GW",
+  "NASA-JPL-DEEP",
+  "PENTAGON-DMZ-3",
+  "ICANN-ROOT-A",
+  "TOKYO-EXCHANGE",
+  "SVALBARD-SAT-UP",
+  "ARPANET-GHOST",
+  "DEEP-THOUGHT-98",
+  "GLOBAL-BACKBONE",
+];
 
-export interface Network {
-  discovered: number;
-  owned: number;
-  passwordAttempt?: { correct: string; incorrect: string };
-}
+const REGIONS = ["US-EAST", "DE-BERLIN", "JP-TOKYO", "CH-ZURICH", "UK-LONDON", "AU-SYDNEY", "CA-TORONTO", "BR-SAOPAULO", "SE-STOCKHOLM", "KR-SEOUL"];
+const PW_CHARS = "abcdefghijklmnopqrstuvwxyz0123456789";
 
-export function createInitialNetwork(): Network {
+export function createInitialNetwork(): NetworkState {
   return {
     discovered: 1,
     owned: 1,
+    recentHosts: ["127.0.0.1 [LOCALHOST] — OWNED"],
+    discoverySeed: Math.floor(Math.random() * 100000),
   };
 }
 
-export class ScanNetworkPurchase extends Purchase {
-  override initialPrice = 1e6;
-  override multiplier = 1.1;
-  override label = "Scan IPs";
-  override maxCount = NETWORK_COUNT - 1;
-
-  override action(state: State): void {
-    state.network.discovered += 1;
-
-    if (!state.network.passwordAttempt) {
-      state.network.passwordAttempt = {
-        correct: "",
-        incorrect: "***",
-      };
-    }
+export function getSeededDiscoveryOrder(seed: number): number[] {
+  const arr = [...WORLDMAP_LAND];
+  let s = seed || 1337;
+  const rand = () => {
+    s = (s * 1664525 + 1013904223) % 4294967296;
+    return s / 4294967296;
+  };
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
-
-  override onPurchaseLog(state: State) {
-    return undefined;
-  }
+  return arr;
 }
 
-export default class AutoScanNetworkPurchase
-  extends Purchase
-  implements UnlocksSystem
-{
-  override initialPrice = 1e6;
-  override label = "Automatically scan IP range";
-  override maxCount = 1;
-
-  override isUnlocked(state: State): boolean {
-    return state.network.discovered > 5;
-  }
-
-  unlocksSystem(state: State): void {
-    state.purchases.ScanNetwork.startPurchase(state);
-  }
-
-  override onPurchaseLog(state: State) {
-    return undefined;
-  }
+export function getTargetHostInfo(index: number): { host: string; ip: string; region: string } {
+  const host =
+    index < HOSTNAMES.length
+      ? HOSTNAMES[index]
+      : `NODE-${(index * 73 + 19).toString(16).toUpperCase()}`;
+  const a = 11 + ((index * 37 + 183) % 210);
+  const b = (index * 53 + 25) % 254;
+  const c = (index * 19 + 4) % 254;
+  const d = 1 + ((index * 97 + 12) % 253);
+  const region = REGIONS[index % REGIONS.length];
+  return { host, ip: `${a}.${b}.${c}.${d}`, region };
 }
 
-function getPassword(state: State): string | undefined {
+export function getCurrentPassword(state: GameState): string | undefined {
   return PASSWORDS[state.network.owned - 1];
 }
 
-export class TryPasswordPurchase extends Purchase {
-  override initialPrice = 10;
-  override multiplier = 1;
-  override label = "Try password";
-  override maxCount = 3;
-
-  override isUnlocked(state: State): boolean {
-    return (
-      state.network.owned < state.network.discovered &&
-      getPassword(state) !== undefined
-    );
+export function generateRandomChars(len: number, exclude = ""): string {
+  const pool = PW_CHARS.split("").filter((c) => !exclude.includes(c));
+  let out = "";
+  for (let i = 0; i < len; i++) {
+    out += pool[Math.floor(Math.random() * pool.length)];
   }
-
-  override action(state: State): void {
-    const currentPassword = getPassword(state);
-
-    if (currentPassword) {
-      const correct = currentPassword.slice(0, this.purchaseCount);
-      const incorrectLength = currentPassword.length - this.purchaseCount;
-      const incorrect = shuffle(
-        PASSWORD_CHARACTERS.split("").filter(
-          (c) => !currentPassword.includes(c)
-        )
-      )
-        .slice(0, incorrectLength)
-        .join("");
-      state.network.passwordAttempt = { correct, incorrect };
-    }
-  }
-
-  override onPurchaseLog(state: State) {
-    return undefined;
-  }
-}
-
-export class BruteforcePasswordPurchase
-  extends Purchase
-  implements UnlocksSystem
-{
-  override initialPrice = 100 * 1e6;
-  override label = "Bruteforce passwords";
-  override maxCount = 1;
-
-  override isUnlocked(state: State): boolean {
-    return (
-      state.network.owned > PASSWORDS.length &&
-      state.network.owned < state.network.discovered
-    );
-  }
-
-  unlocksSystem(state: State) {
-    if (
-      state.purchases.HackComputer.isUnlocked(state) &&
-      !state.purchases.HackComputer.inProgress
-    ) {
-      state.purchases.HackComputer.startPurchase(state);
-      state.network.passwordAttempt = {
-        correct: shuffle(PASSWORD_CHARACTERS).slice(0, 18).join(""),
-        incorrect: "",
-      };
-    }
-  }
-
-  override onPurchaseLog(state: State) {
-    return undefined;
-  }
-}
-
-export class HackComputerPurchase extends Purchase {
-  override initialPrice = 10 * 1e6;
-  override multiplier = 1.1;
-  override label = "Hack computer";
-  override maxCount = NETWORK_COUNT - 1;
-
-  override isUnlocked(state: State): boolean {
-    return (
-      state.purchases.TryPassword.isFullyPurchased &&
-      state.network.discovered > state.network.owned
-    );
-  }
-
-  override action(state: State): void {
-    if (state.network.owned < state.network.discovered) {
-      state.network.owned += 1;
-
-      state.purchases.TryPassword.purchaseCount = 0;
-      state.purchases.TryPassword.maxCount = getPassword(state)?.length ?? 0;
-    }
-  }
+  return out;
 }
